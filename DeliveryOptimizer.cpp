@@ -14,22 +14,21 @@ public:
         double& newCrowDistance) const;
 };
 
-DeliveryOptimizerImpl::DeliveryOptimizerImpl(const StreetMap* sm)
-{
-}
+DeliveryOptimizerImpl::DeliveryOptimizerImpl(const StreetMap* sm) {}
 
-DeliveryOptimizerImpl::~DeliveryOptimizerImpl()
-{
-}
+DeliveryOptimizerImpl::~DeliveryOptimizerImpl() {}
 
-void DeliveryOptimizerImpl::optimizeDeliveryOrder(
-    const GeoCoord& depot,
-    vector<DeliveryRequest>& deliveries,
-    double& oldCrowDistance,
-    double& newCrowDistance) const
+void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<DeliveryRequest>& deliveries, double& oldCrowDistance, double& newCrowDistance) const
 {
-    oldCrowDistance = 0;  // Delete these lines and implement this function correctly
-    newCrowDistance = 0;
+    oldCrowDistance = (deliveries.size() == 0) ? 0 : distanceEarthMiles(depot, deliveries[0].location);
+    for(int i = 1; i < deliveries.size(); i++) {
+        oldCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);
+    }
+    //do reordering here
+    newCrowDistance = (deliveries.size() == 0) ? 0 : distanceEarthMiles(depot, deliveries[0].location);
+    for(int i = 1; i < deliveries.size(); i++) {
+        newCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);
+    }
 }
 
 //******************** DeliveryOptimizer functions ****************************
