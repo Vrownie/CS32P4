@@ -7,11 +7,7 @@ class DeliveryOptimizerImpl
 public:
     DeliveryOptimizerImpl(const StreetMap* sm);
     ~DeliveryOptimizerImpl();
-    void optimizeDeliveryOrder(
-        const GeoCoord& depot,
-        vector<DeliveryRequest>& deliveries,
-        double& oldCrowDistance,
-        double& newCrowDistance) const;
+    void optimizeDeliveryOrder(const GeoCoord& depot, vector<DeliveryRequest>& deliveries, double& oldCrowDistance, double& newCrowDistance) const;
 };
 
 DeliveryOptimizerImpl::DeliveryOptimizerImpl(const StreetMap* sm) {}

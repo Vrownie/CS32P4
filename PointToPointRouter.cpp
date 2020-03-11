@@ -3,32 +3,15 @@
 #include <unordered_set>
 #include <list>
 #include <queue>
-using namespace std;
 
-//template<typename T>
-//class Tree
-//{
-//public:
-//    Tree(T i) : m_root(i) {}
-//private:
-//    struct Node {
-//        Node(T i) {info = i;}
-//        T info;
-//        vector<Node*> branches;
-//    };
-//    Node m_root;
-//};
+using namespace std;
 
 class PointToPointRouterImpl
 {
 public:
     PointToPointRouterImpl(const StreetMap* sm);
     ~PointToPointRouterImpl();
-    DeliveryResult generatePointToPointRoute(
-        const GeoCoord& start,
-        const GeoCoord& end,
-        list<StreetSegment>& route,
-        double& totalDistanceTravelled) const;
+    DeliveryResult generatePointToPointRoute(const GeoCoord& start, const GeoCoord& end, list<StreetSegment>& route, double& totalDistanceTravelled) const;
 private:
     struct GeoHash
     {
@@ -40,21 +23,11 @@ private:
     const StreetMap* m_smp;
 };
 
-PointToPointRouterImpl::PointToPointRouterImpl(const StreetMap* sm)
-{
-    m_smp = sm;
-}
+PointToPointRouterImpl::PointToPointRouterImpl(const StreetMap* sm) { m_smp = sm; }
 
-PointToPointRouterImpl::~PointToPointRouterImpl()
-{
-    
-}
+PointToPointRouterImpl::~PointToPointRouterImpl() {}
 
-DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(
-        const GeoCoord& start,
-        const GeoCoord& end,
-        list<StreetSegment>& route,
-        double& totalDistanceTravelled) const
+DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord& start, const GeoCoord& end, list<StreetSegment>& route, double& totalDistanceTravelled) const
 {
     vector<StreetSegment> ssv;
     if(!m_smp->getSegmentsThatStartWith(start, ssv) || !m_smp->getSegmentsThatStartWith(end, ssv)) return BAD_COORD;
@@ -114,11 +87,7 @@ PointToPointRouter::~PointToPointRouter()
     delete m_impl;
 }
 
-DeliveryResult PointToPointRouter::generatePointToPointRoute(
-        const GeoCoord& start,
-        const GeoCoord& end,
-        list<StreetSegment>& route,
-        double& totalDistanceTravelled) const
+DeliveryResult PointToPointRouter::generatePointToPointRoute(const GeoCoord& start, const GeoCoord& end, list<StreetSegment>& route, double& totalDistanceTravelled) const
 {
     return m_impl->generatePointToPointRoute(start, end, route, totalDistanceTravelled);
 }
