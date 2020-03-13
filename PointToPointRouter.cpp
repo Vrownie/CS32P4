@@ -30,8 +30,14 @@ PointToPointRouterImpl::~PointToPointRouterImpl() {}
 
 DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord& start, const GeoCoord& end, list<StreetSegment>& route, double& totalDistanceTravelled) const
 {
+    if (start == end) {
+        route.clear();
+        totalDistanceTravelled = 0;
+        return DELIVERY_SUCCESS;
+    }
+    
     vector<StreetSegment> ssv;
-    if(!m_smp->getSegmentsThatStartWith(start, ssv) || !m_smp->getSegmentsThatStartWith(end, ssv)) return BAD_COORD;
+    if (!m_smp->getSegmentsThatStartWith(start, ssv) || !m_smp->getSegmentsThatStartWith(end, ssv)) return BAD_COORD;
     
     queue<GeoCoord> cq;
     unordered_set<GeoCoord, GeoHash> visited;
@@ -66,7 +72,7 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
                 pair<GeoCoord, string> p(current, ssv[i].name);
                 map.associate(ssv[i].end, p);
                 cq.push(ssv[i].end);
-                visited.emplace(current);
+                visited.insert(current);
             }
         }
     }

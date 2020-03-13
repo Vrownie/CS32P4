@@ -31,6 +31,14 @@ std::string calcDir(const double& angle) {
 }
 
 bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::list<StreetSegment>& ssl, std::vector<DeliveryCommand>& commands, double& dist) {
+    if(ssl.size()==0) {
+        if(!isFinal) {
+            DeliveryCommand t;
+            t.initAsDeliverCommand(item);
+            commands.push_back(t);
+        }
+        return false;
+    }
     double totalDist = 0;
     std::string streetNow = ssl.front().name, dir;
     GeoCoord startCoord = ssl.front().start, endCoord = ssl.front().end;
