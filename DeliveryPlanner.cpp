@@ -5,6 +5,72 @@
 
 using namespace std;
 
+std::string calcDir(const double& angle) {
+    if (angle > 360) {
+        return "";
+    } else if (angle >= 337.5) {
+        return "east";
+    } else if (angle >= 292.5) {
+        return "southeast";
+    } else if (angle >= 247.5) {
+        return "south";
+    } else if (angle >= 202.5) {
+        return "southwest";
+    } else if (angle >= 157.5) {
+        return "west";
+    } else if (angle >= 112.5) {
+        return "northwest";
+    } else if (angle >= 67.5) {
+        return "north";
+    } else if (angle >= 22.5) {
+        return "northeast";
+    } else if (angle >= 0) {
+        return "east";
+    } else {
+        return "";
+    }
+}
+
+bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::list<StreetSegment>& ssl, std::vector<DeliveryCommand>& commands, double& dist) {
+    double totalDist = 0;
+    std::string streetNow = ssl.front().name, dir;
+    GeoCoord startCoord = ssl.front().start, endCoord = ssl.front().end;
+    double angleFirst = angleOfLine(ssl.front()), distNow = distanceEarthMiles(ssl.front().start, ssl.front().end);
+    DeliveryCommand currentCommand;
+    for(auto ii = next(ssl.begin()); ii != ssl.end(); ii++) {
+        if((*ii).name == streetNow) { //same street
+            distNow += distanceEarthMiles((*ii).start, (*ii).end);
+        } else { //new street
+            endCoord = (*ii).start;
+            dir = calcDir(angleFirst);
+            if(dir == "") return false;
+            currentCommand.initAsProceedCommand(dir, streetNow, distNow);
+            commands.push_back(currentCommand);
+            streetNow = (*ii).name;
+            double angleNew = angleBetween2Lines(*prev(ii),*ii);
+            if (angleNew >= 1 && angleNew < 180) {
+                currentCommand.initAsTurnCommand("left", streetNow);
+            } else if (angleNew >= 180 && angleNew < 359) {
+                currentCommand.initAsTurnCommand("right", streetNow);
+            }
+            commands.push_back(currentCommand);
+            angleFirst = angleOfLine(*ii);
+            totalDist += distNow;
+            distNow = distanceEarthMiles((*ii).start, (*ii).end);;
+        }
+    }
+    dir = calcDir(angleFirst);
+    currentCommand.initAsProceedCommand(dir, streetNow, distNow);
+    commands.push_back(currentCommand);
+    totalDist += distNow;
+    if(!isFinal) {
+        currentCommand.initAsDeliverCommand(item);
+        commands.push_back(currentCommand);
+    }
+    dist += totalDist;
+    return true;
+}
+
 class DeliveryPlannerImpl
 {
 public:
@@ -24,21 +90,25 @@ DeliveryPlannerImpl::~DeliveryPlannerImpl() {}
 DeliveryResult DeliveryPlannerImpl::generateDeliveryPlan(const GeoCoord& depot, const vector<DeliveryRequest>& deliveries, vector<DeliveryCommand>& commands, double& totalDistanceTravelled) const
 {
     vector<DeliveryRequest> deli(deliveries);
-    double distanceOld = 0, distanceNew = 0, distTotal = 0;
+    double distanceOld = 0, distanceNew = 0, distTotal = 0, d = 0;
     m_optimizer.optimizeDeliveryOrder(depot, deli, distanceOld, distanceNew);
     list<StreetSegment> ssl;
+    DeliveryResult status;
     if (deli.size() != 0) {
-        m_ptp.generatePointToPointRoute(depot, deli[0].location, ssl, distTotal);
+        status = m_ptp.generatePointToPointRoute(depot, deli[0].location, ssl, d);
+        if(status != DELIVERY_SUCCESS) return status;
         ParseOneDelivery(false, deli[0].item, ssl, commands, distTotal);
         for (int i = 1; i < deli.size(); i++) {
-            m_ptp.generatePointToPointRoute(deli[i-1].location, deli[i].location, ssl, distTotal);
+            status = m_ptp.generatePointToPointRoute(deli[i-1].location, deli[i].location, ssl, d);
+            if(status != DELIVERY_SUCCESS) return status;
             ParseOneDelivery(false, deli[i].item, ssl, commands, distTotal);
         }
-        m_ptp.generatePointToPointRoute(deli[deli.size()-1].location, depot, ssl, distTotal);
+        status = m_ptp.generatePointToPointRoute(deli[deli.size()-1].location, depot, ssl, d);
+        if(status != DELIVERY_SUCCESS) return status;
         ParseOneDelivery(true, "", ssl, commands, distTotal);
     }
-    
-    return NO_ROUTE;  // Delete this line and implement this function correctly
+    totalDistanceTravelled = distTotal;
+    return DELIVERY_SUCCESS;
 }
 
 //******************** DeliveryPlanner functions ******************************

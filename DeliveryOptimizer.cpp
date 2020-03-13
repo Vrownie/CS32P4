@@ -20,7 +20,26 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<
     for(int i = 1; i < deliveries.size(); i++) {
         oldCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);
     }
-    //do reordering here
+    int minI = -1;
+    double minD = 9999999;
+    for(int i = 0; i < deliveries.size(); i++) {
+        if(distanceEarthMiles(depot, deliveries[i].location) < minD) {
+            minI = i;
+            minD = distanceEarthMiles(depot, deliveries[i].location);
+        }
+    }
+    if (minI != -1) swap(deliveries[0], deliveries[minI]);
+    for(int i = 1; i < deliveries.size(); i++) {
+        int minIndex = -1;
+        double minDist = 9999999;
+        for(int j = i + 1; j < deliveries.size(); j++) {
+            if(distanceEarthMiles(deliveries[i].location, deliveries[j].location) < minDist) {
+                minIndex = j;
+                minDist = distanceEarthMiles(deliveries[i].location, deliveries[j].location);
+            }
+        }
+        if (minIndex != -1) swap(deliveries[i], deliveries[minIndex]);
+    }
     newCrowDistance = (deliveries.size() == 0) ? 0 : distanceEarthMiles(depot, deliveries[0].location);
     for(int i = 1; i < deliveries.size(); i++) {
         newCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);

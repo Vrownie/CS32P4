@@ -18,4 +18,5 @@ int main() {
     for(int i = 0; i < dcv.size(); i++) {
         cout << dcv[i].description() << endl;
     }
+    cout << "Distance: " << d << endl;
 }
