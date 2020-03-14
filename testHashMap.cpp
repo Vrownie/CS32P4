@@ -4,7 +4,7 @@
 
 using namespace std;
 
-unsigned int hash(const string& s) { return std::hash<std::string>()(s); }
+unsigned int hasher(const string& s) { return std::hash<std::string>()(s); }
 
 int main() {
     ExpandableHashMap<string,double> nameToGPA(0.2);

@@ -45,15 +45,15 @@ bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::l
     double angleFirst = angleOfLine(ssl.front()), distNow = distanceEarthMiles(ssl.front().start, ssl.front().end);
     DeliveryCommand currentCommand;
     for(auto ii = next(ssl.begin()); ii != ssl.end(); ii++) {
-        if((*ii).name == streetNow) { //same street
-            distNow += distanceEarthMiles((*ii).start, (*ii).end);
+        if(ii->name == streetNow) { //same street
+            distNow += distanceEarthMiles(ii->start, ii->end);
         } else { //new street
-            endCoord = (*ii).start;
+            endCoord = ii->start;
             dir = calcDir(angleFirst);
             if(dir == "") return false;
             currentCommand.initAsProceedCommand(dir, streetNow, distNow);
             commands.push_back(currentCommand);
-            streetNow = (*ii).name;
+            streetNow = ii->name;
             double angleNew = angleBetween2Lines(*prev(ii),*ii);
             if (angleNew >= 1 && angleNew < 180) {
                 currentCommand.initAsTurnCommand("left", streetNow);
@@ -63,7 +63,7 @@ bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::l
             commands.push_back(currentCommand);
             angleFirst = angleOfLine(*ii);
             totalDist += distNow;
-            distNow = distanceEarthMiles((*ii).start, (*ii).end);;
+            distNow = distanceEarthMiles(ii->start, ii->end);;
         }
     }
     dir = calcDir(angleFirst);

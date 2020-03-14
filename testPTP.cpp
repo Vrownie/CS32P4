@@ -13,7 +13,7 @@ int main() {
     double dist;
     switch (ptp.generatePointToPointRoute(
         GeoCoord("34.0436968", "-118.4800519"),
-        GeoCoord("34.0626582", "-118.4600964"),
+        GeoCoord("34.0721826", "-118.4435144"),
     ssl, dist))
     {
         case DELIVERY_SUCCESS:
@@ -28,7 +28,7 @@ int main() {
     }
     cout << "Total distance: " << dist << endl;
     cerr << ssl.begin()->start.latitudeText << ", " << ssl.begin()->start.longitudeText << endl;
-    for(auto i = ssl.begin(); i != ssl.end(); i++) {
-        cerr << (*i).end.latitudeText << ", " << (*i).end.longitudeText << endl;
+    for(auto ii = ssl.begin(); ii != ssl.end(); ii++) {
+        cerr << ii->end.latitudeText << ", " << ii->end.longitudeText << endl;
     }
 }

@@ -44,7 +44,7 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
     ExpandableHashMap<GeoCoord, pair<GeoCoord, string>> map;
     
     cq.push(start);
-    visited.emplace(start);
+    visited.insert(start);
     while (!cq.empty()) {
         GeoCoord current = cq.front();
         cq.pop();

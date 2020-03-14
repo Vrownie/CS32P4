@@ -34,15 +34,14 @@ public:
       // C++11 syntax for preventing copying and assignment
     ExpandableHashMap(const ExpandableHashMap&) = delete;
     ExpandableHashMap& operator=(const ExpandableHashMap&) = delete;
-    
-//    auto dump() { return m_storage; }
 
 private:
     struct Item {
+        Item(KeyType k, ValueType v) { key = k; value = v; }
         KeyType key;
         ValueType value;
     };
-    std::vector<std::list<Item*>> m_storage;
+    std::vector<std::list<Item>> m_storage;
     double m_mlf;
     int m_nItems;
     int m_nBuckets;
@@ -57,25 +56,11 @@ ExpandableHashMap<KeyType, ValueType>::ExpandableHashMap(double maximumLoadFacto
 }
 
 template<typename KeyType, typename ValueType>
-ExpandableHashMap<KeyType, ValueType>::~ExpandableHashMap()
-{
-     for(int i = 0; i < m_storage.size(); i++) {
-         for(auto ii = m_storage[i].begin(); ii != m_storage[i].end();) {
-             delete *ii;
-             ii = m_storage[i].erase(ii);
-         }
-     }
-}
+ExpandableHashMap<KeyType, ValueType>::~ExpandableHashMap() {}
 
 template<typename KeyType, typename ValueType>
 void ExpandableHashMap<KeyType, ValueType>::reset()
 {
-    for(int i = 0; i < m_storage.size(); i++) {
-        for(auto ii = m_storage[i].begin(); ii != m_storage[i].end();) {
-            delete *ii;
-            ii = m_storage[i].erase(ii);
-        }
-    }
     m_storage.clear();
     m_storage.resize(8);
     m_nItems = 0;
@@ -94,23 +79,20 @@ void ExpandableHashMap<KeyType, ValueType>::associate(const KeyType& key, const 
     
     bool repInd = false;
     for(auto ii = m_storage[h].begin(); ii != m_storage[h].end(); ii++) {
-        if((*ii)->key == key) {
-            (*ii)->value = value;
+        if(ii->key == key) {
+            ii->value = value;
             repInd = true;
             break;
         }
     }
     
     if(!repInd) {
-        Item* ip = new Item;
-        ip->key = key;
-        ip->value = value;
-        m_storage[h].push_back(ip);
+        m_storage[h].push_back(Item(key,value));
         m_nItems++;
     }
     
     if((double) m_nItems / (double) m_nBuckets > m_mlf) {
-        std::list<Item*> temp;
+        std::list<Item> temp;
         
         for(int i = 0; i < m_storage.size(); i++) {
             temp.splice(temp.begin(), m_storage[i]);
@@ -122,7 +104,7 @@ void ExpandableHashMap<KeyType, ValueType>::associate(const KeyType& key, const 
         m_storage.clear();
         m_storage.resize(m_nBuckets);
         for (auto ii = temp.begin(); ii != temp.end(); ii++) {
-            associate((*ii)->key, (*ii)->value);
+            associate(ii->key, ii->value);
         }
     }
 }
@@ -135,7 +117,7 @@ const ValueType* ExpandableHashMap<KeyType, ValueType>::find(const KeyType& key)
     h %= m_nBuckets;
     
     for(auto ii = m_storage[h].begin(); ii != m_storage[h].end(); ii++) {
-        if((*ii)->key == key) return (&(*ii)->value);
+        if(ii->key == key) return (&ii->value);
     }
     return nullptr;
 }

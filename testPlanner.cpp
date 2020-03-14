@@ -15,7 +15,7 @@ int main() {
     vector<DeliveryRequest> drv3 = {DeliveryRequest("Dub Dub", GeoCoord("34.0625329", "-118.4470263"))};
     vector<DeliveryCommand> dcv;
     double d;
-    dp.generateDeliveryPlan(depot, drv3, dcv, d);
+    dp.generateDeliveryPlan(depot, drv, dcv, d);
     for(int i = 0; i < dcv.size(); i++) {
         cout << dcv[i].description() << endl;
     }

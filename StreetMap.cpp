@@ -41,8 +41,6 @@ bool StreetMapImpl::load(string mapFile)
     
     while(true) {
         string name;
-        GeoCoord* a;
-        GeoCoord* b;
         
         string in;
         if(getline(ifs, in)) name = in;
@@ -60,29 +58,14 @@ bool StreetMapImpl::load(string mapFile)
                 if (in[j] == ' ') n++;
                 else sa[n] += in[j];
             }
-            a = new GeoCoord(sa[0], sa[1]);
-            b = new GeoCoord(sa[2], sa[3]);
-            if (m_mapping.find(*a) == nullptr) m_mapping.associate(*a, vector<StreetSegment>());
-            m_mapping.find(*a)->push_back(StreetSegment(*a, *b, name));
-            if (m_mapping.find(*b) == nullptr) m_mapping.associate(*b, vector<StreetSegment>());
-            m_mapping.find(*b)->push_back(StreetSegment(*b, *a, name));
+            GeoCoord a(sa[0], sa[1]);
+            GeoCoord b(sa[2], sa[3]);
+            if (m_mapping.find(a) == nullptr) m_mapping.associate(a, vector<StreetSegment>());
+            m_mapping.find(a)->push_back(StreetSegment(a, b, name));
+            if (m_mapping.find(b) == nullptr) m_mapping.associate(b, vector<StreetSegment>());
+            m_mapping.find(b)->push_back(StreetSegment(b, a, name));
         }
     }
-    
-//    auto a = m_mapping.dump();
-//    int counter = 0;
-//    for(auto i = a.begin(); i != a.end(); i++) {
-//        for(auto j = (*i).begin(); j != (*i).end(); j++) {
-//            counter++;
-//            std::cerr << counter << ": " << (*j)->key.latitudeText << " " << (*j)->key.longitudeText << std::endl;
-//            for(auto k = (*j)->value.begin(); k != (*j)->value.end(); k++) {
-//                std::cerr << (*k).name << endl;
-//                std::cerr << (*k).start.latitudeText << " " << (*k).start.longitudeText << std::endl;
-//                std::cerr << (*k).end.latitudeText << " " << (*k).end.longitudeText << std::endl;
-//                std::cerr << std::endl;
-//            }
-//        }
-//    }
     
     return true;
 }
