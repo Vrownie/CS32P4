@@ -4,34 +4,35 @@
 
 using namespace std;
 
-std::string calcDir(const double& angle) {
-    if (angle > 360) {
+inline string calcDir(const double& angle)
+{
+    if (angle > 360)
         return "";
-    } else if (angle >= 337.5) {
+    else if (angle >= 337.5)
         return "east";
-    } else if (angle >= 292.5) {
+    else if (angle >= 292.5)
         return "southeast";
-    } else if (angle >= 247.5) {
+    else if (angle >= 247.5)
         return "south";
-    } else if (angle >= 202.5) {
+    else if (angle >= 202.5)
         return "southwest";
-    } else if (angle >= 157.5) {
+    else if (angle >= 157.5)
         return "west";
-    } else if (angle >= 112.5) {
+    else if (angle >= 112.5)
         return "northwest";
-    } else if (angle >= 67.5) {
+    else if (angle >= 67.5)
         return "north";
-    } else if (angle >= 22.5) {
+    else if (angle >= 22.5)
         return "northeast";
-    } else if (angle >= 0) {
+    else if (angle >= 0)
         return "east";
-    } else {
+    else
         return "";
-    }
 }
 
-bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::list<StreetSegment>& ssl, std::vector<DeliveryCommand>& commands, double& dist) {
-    if(ssl.size()==0) {
+bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::list<StreetSegment>& ssl, std::vector<DeliveryCommand>& commands, double& dist)
+{
+    if(ssl.size()==0) { //empty
         if(!isFinal) {
             DeliveryCommand t;
             t.initAsDeliverCommand(item);
@@ -39,37 +40,46 @@ bool ParseOneDelivery(const bool& isFinal, const std::string& item, const std::l
         }
         return false;
     }
+    
     double totalDist = 0;
-    std::string streetNow = ssl.front().name, dir;
+    string streetNow = ssl.front().name, dir;
     GeoCoord startCoord = ssl.front().start, endCoord = ssl.front().end;
     double angleFirst = angleOfLine(ssl.front()), distNow = distanceEarthMiles(ssl.front().start, ssl.front().end);
     DeliveryCommand currentCommand;
     for(auto ii = next(ssl.begin()); ii != ssl.end(); ii++) {
-        if(ii->name == streetNow) { //same street
+        if(ii->name == streetNow) //same street
             distNow += distanceEarthMiles(ii->start, ii->end);
-        } else { //new street
+        else { //new street
             endCoord = ii->start;
             dir = calcDir(angleFirst);
             if(dir == "") return false;
             currentCommand.initAsProceedCommand(dir, streetNow, distNow);
             commands.push_back(currentCommand);
+            
+            //turn command
             streetNow = ii->name;
             double angleNew = angleBetween2Lines(*prev(ii),*ii);
             if (angleNew >= 1 && angleNew < 180) {
                 currentCommand.initAsTurnCommand("left", streetNow);
+                commands.push_back(currentCommand);
             } else if (angleNew >= 180 && angleNew < 359) {
                 currentCommand.initAsTurnCommand("right", streetNow);
+                commands.push_back(currentCommand);
             }
-            commands.push_back(currentCommand);
+            //update for next command
             angleFirst = angleOfLine(*ii);
             totalDist += distNow;
-            distNow = distanceEarthMiles(ii->start, ii->end);;
+            distNow = distanceEarthMiles(ii->start, ii->end);
         }
     }
+    
+    //for the last command
     dir = calcDir(angleFirst);
     currentCommand.initAsProceedCommand(dir, streetNow, distNow);
     commands.push_back(currentCommand);
     totalDist += distNow;
+    
+    //check if it's the final
     if(!isFinal) {
         currentCommand.initAsDeliverCommand(item);
         commands.push_back(currentCommand);
@@ -96,24 +106,31 @@ DeliveryPlannerImpl::~DeliveryPlannerImpl() {}
 
 DeliveryResult DeliveryPlannerImpl::generateDeliveryPlan(const GeoCoord& depot, const vector<DeliveryRequest>& deliveries, vector<DeliveryCommand>& commands, double& totalDistanceTravelled) const
 {
-    vector<DeliveryRequest> deli(deliveries);
+    vector<DeliveryRequest> deli(deliveries); //so we don't modify the original
     double distanceOld = 0, distanceNew = 0, distTotal = 0, d = 0;
     m_optimizer.optimizeDeliveryOrder(depot, deli, distanceOld, distanceNew);
+    
     list<StreetSegment> ssl;
     DeliveryResult status;
     if (deli.size() != 0) {
+        //depot->first
         status = m_ptp.generatePointToPointRoute(depot, deli[0].location, ssl, d);
         if(status != DELIVERY_SUCCESS) return status;
         ParseOneDelivery(false, deli[0].item, ssl, commands, distTotal);
+        
+        //in between
         for (int i = 1; i < deli.size(); i++) {
             status = m_ptp.generatePointToPointRoute(deli[i-1].location, deli[i].location, ssl, d);
             if(status != DELIVERY_SUCCESS) return status;
             ParseOneDelivery(false, deli[i].item, ssl, commands, distTotal);
         }
+        
+        //last->depot
         status = m_ptp.generatePointToPointRoute(deli[deli.size()-1].location, depot, ssl, d);
         if(status != DELIVERY_SUCCESS) return status;
         ParseOneDelivery(true, "", ssl, commands, distTotal);
     }
+    
     totalDistanceTravelled = distTotal;
     return DELIVERY_SUCCESS;
 }

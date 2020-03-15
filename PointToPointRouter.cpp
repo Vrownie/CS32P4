@@ -16,10 +16,7 @@ public:
 private:
     struct GeoHash
     {
-        unsigned int operator()(const GeoCoord& g) const
-        {
-            return std::hash<string>()(g.latitudeText + g.longitudeText);
-        }
+        unsigned int operator()(const GeoCoord& g) const { return std::hash<string>()(g.latitudeText + g.longitudeText); }
     };
     const StreetMap* m_smp;
 };
@@ -39,6 +36,7 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
     vector<StreetSegment> ssv;
     if (!m_smp->getSegmentsThatStartWith(start, ssv) || !m_smp->getSegmentsThatStartWith(end, ssv)) return BAD_COORD;
     
+    //BFS
     queue<GeoCoord> cq;
     unordered_set<GeoCoord, GeoHash> visited;
     ExpandableHashMap<GeoCoord, pair<GeoCoord, string>> map;
@@ -48,6 +46,8 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
     while (!cq.empty()) {
         GeoCoord current = cq.front();
         cq.pop();
+        
+        //if we reached the end
         if (current == end) {
             GeoCoord coord = end;
             pair<GeoCoord, string>* cpair;
@@ -66,9 +66,11 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
             totalDistanceTravelled = dist;
             return DELIVERY_SUCCESS;
         }
+        
+        //if we didn't reach the end yet
         m_smp->getSegmentsThatStartWith(current, ssv);
         for(int i = 0; i < ssv.size(); i++) {
-            if (visited.find(ssv[i].end) == visited.end()) {
+            if (visited.find(ssv[i].end) == visited.end()) { //if we have not visited theis coordinate
                 pair<GeoCoord, string> p(current, ssv[i].name);
                 map.associate(ssv[i].end, p);
                 cq.push(ssv[i].end);
@@ -76,7 +78,7 @@ DeliveryResult PointToPointRouterImpl::generatePointToPointRoute(const GeoCoord&
             }
         }
     }
-    return NO_ROUTE;
+    return NO_ROUTE; //cannot find any path
 }
 
 //******************** PointToPointRouter functions ***************************

@@ -18,10 +18,12 @@ DeliveryOptimizerImpl::~DeliveryOptimizerImpl() {}
 
 void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<DeliveryRequest>& deliveries, double& oldCrowDistance, double& newCrowDistance) const
 {
+    //before
     oldCrowDistance = (deliveries.size() == 0) ? 0 : distanceEarthMiles(depot, deliveries[0].location);
-    for(int i = 1; i < deliveries.size(); i++) {
+    for(int i = 1; i < deliveries.size(); i++)
         oldCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);
-    }
+    
+    //depot->first
     int minI = -1;
     double minD = 9999999;
     for(int i = 0; i < deliveries.size(); i++) {
@@ -31,6 +33,8 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<
         }
     }
     if (minI != -1) swap(deliveries[0], deliveries[minI]);
+    
+    //in-between
     for(int i = 1; i < deliveries.size(); i++) {
         int minIndex = -1;
         double minDist = 9999999;
@@ -42,10 +46,11 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<
         }
         if (minIndex != -1) swap(deliveries[i], deliveries[minIndex]);
     }
+    
+    //after
     newCrowDistance = (deliveries.size() == 0) ? 0 : distanceEarthMiles(depot, deliveries[0].location);
-    for(int i = 1; i < deliveries.size(); i++) {
+    for(int i = 1; i < deliveries.size(); i++)
         newCrowDistance += distanceEarthMiles(deliveries[i-1].location, deliveries[i].location);
-    }
 }
 
 //******************** DeliveryOptimizer functions ****************************

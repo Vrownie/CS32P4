@@ -91,6 +91,7 @@ void ExpandableHashMap<KeyType, ValueType>::associate(const KeyType& key, const 
         m_nItems++;
     }
     
+    //Rehash
     if((double) m_nItems / (double) m_nBuckets > m_mlf) {
         std::list<Item> temp;
         
@@ -103,6 +104,7 @@ void ExpandableHashMap<KeyType, ValueType>::associate(const KeyType& key, const 
         m_nBuckets *= 2;
         m_storage.clear();
         m_storage.resize(m_nBuckets);
+        
         for (auto ii = temp.begin(); ii != temp.end(); ii++) {
             associate(ii->key, ii->value);
         }

@@ -8,10 +8,7 @@
 
 using namespace std;
 
-unsigned int hasher(const GeoCoord& g)
-{
-    return std::hash<string>()(g.latitudeText + g.longitudeText);
-}
+unsigned int hasher(const GeoCoord& g) { return std::hash<string>()(g.latitudeText + g.longitudeText); }
 
 class StreetMapImpl
 {
@@ -58,6 +55,7 @@ bool StreetMapImpl::load(string mapFile)
                 if (in[j] == ' ') n++;
                 else sa[n] += in[j];
             }
+            
             GeoCoord a(sa[0], sa[1]);
             GeoCoord b(sa[2], sa[3]);
             if (m_mapping.find(a) == nullptr) m_mapping.associate(a, vector<StreetSegment>());
