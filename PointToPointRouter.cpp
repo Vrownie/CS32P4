@@ -14,8 +14,7 @@ public:
     ~PointToPointRouterImpl();
     DeliveryResult generatePointToPointRoute(const GeoCoord& start, const GeoCoord& end, list<StreetSegment>& route, double& totalDistanceTravelled) const;
 private:
-    struct GeoHash
-    {
+    struct GeoHash {
         unsigned int operator()(const GeoCoord& g) const { return std::hash<string>()(g.latitudeText + g.longitudeText); }
     };
     const StreetMap* m_smp;

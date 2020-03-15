@@ -1,7 +1,5 @@
 #include <vector>
 #include <list>
-#include <functional>
-#include <iostream>
 
 #ifndef ExpandableHashMap_h
 #define ExpandableHashMap_h
@@ -105,9 +103,8 @@ void ExpandableHashMap<KeyType, ValueType>::associate(const KeyType& key, const 
         m_storage.clear();
         m_storage.resize(m_nBuckets);
         
-        for (auto ii = temp.begin(); ii != temp.end(); ii++) {
+        for (auto ii = temp.begin(); ii != temp.end(); ii++)
             associate(ii->key, ii->value);
-        }
     }
 }
 
@@ -118,9 +115,9 @@ const ValueType* ExpandableHashMap<KeyType, ValueType>::find(const KeyType& key)
     unsigned int h = hasher(key);
     h %= m_nBuckets;
     
-    for(auto ii = m_storage[h].begin(); ii != m_storage[h].end(); ii++) {
+    for(auto ii = m_storage[h].begin(); ii != m_storage[h].end(); ii++)
         if(ii->key == key) return (&ii->value);
-    }
+        
     return nullptr;
 }
 

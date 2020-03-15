@@ -150,11 +150,7 @@ DeliveryPlanner::~DeliveryPlanner()
     delete m_impl;
 }
 
-DeliveryResult DeliveryPlanner::generateDeliveryPlan(
-    const GeoCoord& depot,
-    const vector<DeliveryRequest>& deliveries,
-    vector<DeliveryCommand>& commands,
-    double& totalDistanceTravelled) const
+DeliveryResult DeliveryPlanner::generateDeliveryPlan(const GeoCoord& depot, const vector<DeliveryRequest>& deliveries, vector<DeliveryCommand>& commands, double& totalDistanceTravelled) const
 {
     return m_impl->generateDeliveryPlan(depot, deliveries, commands, totalDistanceTravelled);
 }

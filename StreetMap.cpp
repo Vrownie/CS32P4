@@ -31,6 +31,7 @@ bool StreetMapImpl::load(string mapFile)
 {
     ifstream ifs;
     ifs.open(mapFile.c_str(), ios::in);
+    
     if(!ifs) {
         cerr << "Bad file name! " << endl;
         return false;

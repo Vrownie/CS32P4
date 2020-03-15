@@ -35,7 +35,7 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<
     if (minI != -1) swap(deliveries[0], deliveries[minI]);
     
     //in-between
-    for(int i = 1; i < deliveries.size(); i++) {
+    for(int i = 0; i < deliveries.size(); i++) {
         int minIndex = -1;
         double minDist = 9999999;
         for(int j = i + 1; j < deliveries.size(); j++) {
@@ -44,7 +44,7 @@ void DeliveryOptimizerImpl::optimizeDeliveryOrder(const GeoCoord& depot, vector<
                 minDist = distanceEarthMiles(deliveries[i].location, deliveries[j].location);
             }
         }
-        if (minIndex != -1) swap(deliveries[i], deliveries[minIndex]);
+        if (minIndex != -1) swap(deliveries[i+1], deliveries[minIndex]);
     }
     
     //after
@@ -68,11 +68,7 @@ DeliveryOptimizer::~DeliveryOptimizer()
     delete m_impl;
 }
 
-void DeliveryOptimizer::optimizeDeliveryOrder(
-        const GeoCoord& depot,
-        vector<DeliveryRequest>& deliveries,
-        double& oldCrowDistance,
-        double& newCrowDistance) const
+void DeliveryOptimizer::optimizeDeliveryOrder(const GeoCoord& depot, vector<DeliveryRequest>& deliveries, double& oldCrowDistance, double& newCrowDistance) const
 {
     return m_impl->optimizeDeliveryOrder(depot, deliveries, oldCrowDistance, newCrowDistance);
 }
